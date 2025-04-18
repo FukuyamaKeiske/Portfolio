@@ -1,0 +1,54 @@
+{
+  "header": {
+    "projects": "Projects",
+    "stack": "Stack",
+    "about": "About Me",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Fukuyama Keiske",
+    "subtitle": "Creating modern applications with a focus on user experience and performance",
+    "contactButton": "Get in touch"
+  },
+  "projects": {
+    "title": "Projects",
+    "categories": {
+      "all": "All",
+      "web": "Web",
+      "mobile": "Mobile",
+      "desktop": "Desktop",
+      "ai": "AI",
+      "scripts": "Scripts",
+      "bots": "Bots"
+    },
+    "tags": {
+      "openSource": "Open Source",
+      "closedSource": "Closed Source",
+      "inDevelopment": "In Development"
+    }
+  },
+  "stack": {
+    "title": "Technology Stack",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "mobile": "Mobile",
+    "other": "Other"
+  },
+  "about": {
+    "title": "About Me",
+    "content": "I'm a passionate Fullstack Developer with expertise in modern technologies. I focus on creating clean, efficient, and user-friendly applications. With a strong foundation in both frontend and backend development, I enjoy solving complex problems and continuously learning new technologies.",
+    "location": "Krasnodar, Russia"
+  },
+  "contact": {
+    "title": "Contact Me",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send Message",
+    "success": "Message sent successfully!",
+    "error": "Error sending message. Please try again."
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}
