@@ -19,7 +19,7 @@ const roboto = Roboto({
 
 export const metadata = {
   title: "Fukuyama Keiske",
-  description: "Portfolio website showcasing my skills and projects as a Fullstack Developer"
+  description: "Portfolio website showcasing my skills and projects as a Fullstack Developer",
 }
 
 export default function RootLayout({

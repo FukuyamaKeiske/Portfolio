@@ -7,10 +7,12 @@ import { useEffect, useState } from "react"
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const [mounted, setMounted] = useState(false)
 
+  // Ensure we're rendering client-side only to avoid hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Use a simple approach to avoid hydration mismatch
   if (!mounted) {
     return <>{children}</>
   }

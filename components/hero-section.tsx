@@ -9,11 +9,13 @@ export default function HeroSection() {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-transparent z-0 pointer-events-none" />
+      {/* Затемнение фона только для секции Hero */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-transparent z-10 pointer-events-none" />
 
+      {/* Частицы на фоне */}
       <ParticlesBackground />
 
-      <div className="container mx-auto px-4 py-16 relative z-10">
+      <div className="container mx-auto px-4 py-16 relative z-30">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

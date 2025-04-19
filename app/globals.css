@@ -27,25 +27,25 @@
   }
 
   .dark {
-    --background: 240 10% 10%;
+    --background: 240 15% 6%; /* Более темный фон */
     --foreground: 0 0% 98%;
-    --card: 240 10% 13%;
+    --card: 240 15% 8%; /* Более темные карточки */
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 13%;
+    --popover: 240 15% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 270 30% 34%;
+    --primary: 270 40% 45%; /* Делаем фиолетовый ярче */
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 270 30% 34%;
+    --accent: 270 40% 45%; /* Делаем фиолетовый ярче */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 270 30% 34%;
+    --ring: 270 40% 45%; /* Делаем фиолетовый ярче */
   }
 }
 
@@ -160,4 +160,39 @@
   z-index: -1;
   transform: translateY(0);
   transition: transform 0.1s ease-out;
+}
+
+/* Дополнительные стили для темной темы */
+.dark .vanta-bg {
+  opacity: 0.85; /* Немного уменьшаем непрозрачность в темной теме */
+}
+
+/* В конце файла добавим стили для запасного фона */
+
+/* Запасной фон для светлой темы */
+.fallback-bg-light {
+  background: linear-gradient(135deg, #fff5f7 0%, #f8f8ff 100%);
+}
+
+/* Запасной фон для темной темы */
+.fallback-bg-dark {
+  background: linear-gradient(135deg, #0f0a1a 0%, #1a1025 100%);
+}
+
+/* Анимация для запасного фона */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
 }

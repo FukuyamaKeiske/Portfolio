@@ -1,155 +1,167 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { useTheme } from "next-themes"
+import Script from "next/script"
 
 export default function AnimatedBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const vantaRef = useRef<HTMLDivElement>(null)
+  const [vantaEffect, setVantaEffect] = useState<any>(null)
   const { theme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  const [scriptsLoaded, setScriptsLoaded] = useState(false)
+  const [vantaInitialized, setVantaInitialized] = useState(false)
 
+  // Устанавливаем mounted в true только на клиенте
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    setMounted(true)
+  }, [])
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+  // Функция для ��роверки доступности Vanta.js
+  const isVantaAvailable = () => {
+    return (
+      typeof window !== "undefined" &&
+      window.VANTA !== undefined &&
+      window.THREE !== undefined &&
+      typeof window.VANTA.WAVES === "function"
+    )
+  }
 
-    let animationFrameId: number
-    let scrollY = window.scrollY
-    let lastScrollY = scrollY
-    let time = 0
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = Math.max(document.body.scrollHeight, window.innerHeight * 1.5)
-
-      drawWaves()
+  // Функция для инициализации Vanta эффекта
+  const initVantaEffect = () => {
+    // Проверяем доступность Vanta.js
+    if (!isVantaAvailable()) {
+      console.warn("VANTA.WAVES is not available, using fallback background")
+      return false
     }
 
-    const drawWaves = () => {
-      const currentTheme = resolvedTheme || theme
+    // Очищаем предыдущий эффект при повторной инициализации
+    if (vantaEffect) {
+      vantaEffect.destroy()
+    }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    // Определяем цвета в зависимости от темы
+    const currentTheme = resolvedTheme || theme
+    const isDarkTheme = currentTheme === "dark"
 
-      const lightColors = [
-        "rgba(255, 182, 193, 0.3)",
-        "rgba(255, 182, 193, 0.2)",
-        "rgba(255, 182, 193, 0.1)",
-        "rgba(230, 230, 250, 0.25)",
-        "rgba(230, 230, 250, 0.15)",
-      ]
+    // Настройки для темной и светлой темы - МИНИМАЛИСТИЧНЫЕ
+    const colorConfig = isDarkTheme
+      ? {
+          color: 0x2a1b41, // Более темный оттенок dark-accent
+          shininess: 15, // Уменьшенный блеск
+          waveHeight: 8, // Уменьшенная высота волн
+          waveSpeed: 0.4, // Уменьшенная скорость
+          zoom: 0.8, // Увеличенный зум для меньшего количества деталей
+          backgroundColor: 0x0f0a1a, // Темный фоновый цвет
+        }
+      : {
+          color: 0xffb6c1, // light-accent
+          shininess: 15, // Уменьшенный блеск
+          waveHeight: 8, // Уменьшенная высота волн
+          waveSpeed: 0.4, // Уменьшенная скорость
+          zoom: 0.8, // Увеличенный зум для меньшего количества деталей
+          backgroundColor: null, // Без фонового цвета для светлой темы
+        }
 
-      const darkColors = [
-        "rgba(74, 59, 113, 0.35)",
-        "rgba(74, 59, 113, 0.25)",
-        "rgba(74, 59, 113, 0.15)",
-        "rgba(106, 90, 255, 0.2)",
-        "rgba(138, 122, 255, 0.15)",
-      ]
+    // Создаем эффект только если элемент существует
+    if (vantaRef.current) {
+      try {
+        // Явно проверяем наличие VANTA.WAVES перед вызовом
+        if (typeof window.VANTA?.WAVES !== "function") {
+          console.error("VANTA.WAVES is not a function")
+          return false
+        }
 
-      const colors = currentTheme === "dark" ? darkColors : lightColors
+        const newEffect = window.VANTA.WAVES({
+          el: vantaRef.current,
+          THREE: window.THREE, // Явно передаем THREE
+          mouseControls: false, // Отключаем интерактивность с мышью
+          touchControls: false, // Отключаем интерактивность с тачскрином
+          gyroControls: false, // Отключаем гироскоп
+          minHeight: 200.0,
+          minWidth: 200.0,
+          scale: 1.0,
+          scaleMobile: 1.0,
+          color: colorConfig.color,
+          shininess: colorConfig.shininess,
+          waveHeight: colorConfig.waveHeight,
+          waveSpeed: colorConfig.waveSpeed,
+          zoom: colorConfig.zoom,
+          backgroundColor: colorConfig.backgroundColor,
+          fps: 20, // Ограничиваем FPS для экономии ресурсов
+        })
 
-      const totalWaves = 7
-
-      for (let i = 0; i < totalWaves; i++) {
-        const noiseOffset = Math.sin(time * 0.1 + i) * 0.2
-        const amplitude = 0.4 + (i / totalWaves) * 0.6 + noiseOffset
-        const frequency = 0.003 + Math.sin(time * 0.05 + i * 2) * 0.001
-        const speed = 0.15 + (i / totalWaves) * 0.4 + Math.cos(time * 0.1) * 0.05
-        const parallaxFactor = 0.05 + (i / totalWaves) * 0.5
-
-        const positionOffset = Math.sin(time * 0.2 + i * 3) * canvas.height * 0.05
-
-        drawWave(
-          ctx,
-          time * speed,
-          colors[i % colors.length],
-          canvas.width,
-          canvas.height,
-          amplitude,
-          frequency * (1 + Math.sin(time * 0.1 + i) * 0.3),
-          scrollY * parallaxFactor,
-          i * (canvas.height / (totalWaves - 0.5)) + positionOffset,
-        )
+        setVantaEffect(newEffect)
+        return true
+      } catch (error) {
+        console.error("Error initializing VANTA effect:", error)
+        return false
       }
     }
+    return false
+  }
 
-    const drawWave = (
-      ctx: CanvasRenderingContext2D,
-      time: number,
-      color: string,
-      width: number,
-      height: number,
-      amplitude: number,
-      frequency: number,
-      scrollOffset: number,
-      baseY: number,
-    ) => {
-      const waveHeight = height / 5
+  // Инициализация Vanta эффекта с задержкой после загрузки скриптов
+  useEffect(() => {
+    if (!mounted || !scriptsLoaded) return
 
-      ctx.beginPath()
-
-      const startY = baseY + Math.sin(time) * waveHeight * amplitude - scrollOffset * 0.1
-      ctx.moveTo(0, startY)
-
-      for (let x = 0; x <= width + 50; x += 5) {
-        const chaos = Math.sin(x * 0.01 + time * 2) * 10 
-
-        const y =
-          baseY +
-          Math.sin(x * frequency + time) * waveHeight * amplitude +
-          Math.sin(x * frequency * 1.5 + time * 1.3) * waveHeight * amplitude * 0.3 +
-          Math.sin(x * frequency * 0.5 + time * 0.7) * waveHeight * amplitude * 0.2 +
-          chaos -
-          scrollOffset * 0.1
-
-        ctx.lineTo(x, y)
-      }
-
-      ctx.lineTo(width, height)
-      ctx.lineTo(0, height)
-      ctx.closePath()
-
-      const gradient = ctx.createLinearGradient(0, baseY - waveHeight, 0, baseY + waveHeight * 2)
-      gradient.addColorStop(0, color)
-      gradient.addColorStop(1, "rgba(0,0,0,0)")
-
-      ctx.fillStyle = gradient
-      ctx.fill()
-    }
-
-    const handleScroll = () => {
-      lastScrollY = scrollY
-      scrollY = window.scrollY
-    }
-
-    window.addEventListener("resize", handleResize)
-    window.addEventListener("scroll", handleScroll)
-    handleResize()
-
-    const animate = () => {
-      time += 0.01
-      drawWaves()
-      animationFrameId = requestAnimationFrame(animate)
-    }
-
-    animate()
+    // Добавляем небольшую задержку для уверенности, что скрипты полностью инициализированы
+    const timer = setTimeout(() => {
+      const success = initVantaEffect()
+      setVantaInitialized(success)
+    }, 500)
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      window.removeEventListener("scroll", handleScroll)
-      cancelAnimationFrame(animationFrameId)
+      clearTimeout(timer)
+      if (vantaEffect) {
+        vantaEffect.destroy()
+      }
     }
-  }, [theme, resolvedTheme])
+  }, [theme, resolvedTheme, mounted, scriptsLoaded])
+
+  // Если не смонтирован, возвращаем пустой div для избежания ошибок гидратации
+  if (!mounted) {
+    return <div className="fixed top-0 left-0 w-full h-full -z-10" />
+  }
+
+  // Создаем CSS-классы для фона в зависимости от темы
+  const bgClass =
+    resolvedTheme === "dark"
+      ? "bg-gradient-to-b from-[#0f0a1a] to-[#1a1025] animated-gradient"
+      : "bg-gradient-to-b from-[#fff5f7] to-[#f8f8ff] animated-gradient"
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
-      style={{
-        opacity: 1,
-        transform: "translateZ(0)",
-      }}
-    />
+    <>
+      {/* Загружаем скрипты внутри компонента */}
+      <Script
+        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+        onLoad={() => console.log("THREE.js loaded")}
+        strategy="afterInteractive"
+      />
+      <Script
+        src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"
+        onLoad={() => {
+          console.log("VANTA.js loaded")
+          setScriptsLoaded(true)
+        }}
+        strategy="afterInteractive"
+        onError={(e) => {
+          console.error("Error loading VANTA.js:", e)
+        }}
+      />
+
+      {/* Запасной фон на случай, если Vanta не загрузится */}
+      <div className={`fixed top-0 left-0 w-full h-full -z-10 transition-colors duration-500 ${bgClass}`} />
+
+      {/* Контейнер для Vanta эффекта */}
+      <div
+        ref={vantaRef}
+        className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
+        style={{
+          opacity: vantaInitialized ? 0.9 : 0, // Показываем только если инициализирован
+          transition: "opacity 0.5s ease-in-out",
+        }}
+      />
+    </>
   )
 }

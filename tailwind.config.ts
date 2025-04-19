@@ -24,9 +24,9 @@ const config: Config = {
         "light-secondary": "#F5F5F5",
         "light-tertiary": "#E6E6FA",
 
-        // Dark theme
+        // Dark theme - делаем цвета ярче
         "dark-background": "#1A1A1A",
-        "dark-accent": "#4A3B71",
+        "dark-accent": "#6A4B91", // Делаем ярче
 
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
